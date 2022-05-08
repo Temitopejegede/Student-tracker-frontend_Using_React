@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
@@ -17,11 +17,29 @@ export default function Student() {
   const paperStyle = { padding: "50px 20px", width: 600, margin: "20px auto" };
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [students, setStudents] = useState([]);
+
   const handleClick = (e) => {
     e.preventDefault();
     const student = { name, address, setAddress };
     console.log(student);
+    fetch("http://localhost:8004/Student/add", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(student),
+    }).then(() => {
+      console.log("New Student added");
+    });
+    window.location.reload(false);
   };
+
+  useEffect(() => {
+    fetch("http://localhost:8004/Student/getAll")
+      .then((res) => res.json())
+      .then((result) => {
+        setStudents(result);
+      });
+  }, []);
 
   return (
     <Container>
@@ -54,6 +72,24 @@ export default function Student() {
             Submit
           </Button>
         </form>
+      </Paper>
+
+      <h1>Students</h1>
+
+      <Paper elevation={3} style={paperStyle}>
+        {students.map((student) => (
+          <Paper
+            elevation={6}
+            style={{ margin: "10px", padding: "15px", textAlign: "left" }}
+            key={student.id}
+          >
+            Id:{student.id}
+            <br></br>
+            Name: {student.name}
+            <br></br>
+            Address: {student.address}
+          </Paper>
+        ))}
       </Paper>
     </Container>
   );
